@@ -1,0 +1,51 @@
+name: macOS DMG 빌드
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build-macos:
+    name: macOS ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: Apple Silicon
+            runner: macos-14
+            target: aarch64-apple-darwin
+          - arch: Intel
+            runner: macos-13
+            target: x86_64-apple-darwin
+
+    steps:
+      - name: 소스 가져오기
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Rust 대상 설정
+        run: rustup target add ${{ matrix.target }}
+
+      - name: JavaScript 의존성 설치
+        run: npm ci
+
+      - name: DMG 만들기
+        run: npm run tauri -- build --bundles dmg --target ${{ matrix.target }}
+
+      - name: DMG 업로드
+        uses: actions/upload-artifact@v4
+        with:
+          name: 클리커-장난감-0.1.1-macos-${{ matrix.target }}
+          path: src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
+          if-no-files-found: error

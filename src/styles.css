@@ -1,0 +1,34 @@
+:root { font-family: "Segoe UI", "Apple SD Gothic Neo", sans-serif; background: transparent; color: #384452; }
+* { box-sizing: border-box; }
+html, body, #root { width: 100%; min-width: 0; min-height: 0; height: 100%; margin: 0; background: transparent; overflow: hidden; }
+button, input { font: inherit; }
+.widget-shell { width: 100%; height: 100%; display: grid; place-items: center; background: transparent; cursor: grab; user-select: none; }
+.widget-shell:active { cursor: grabbing; }
+.pet-grid { display: grid; gap: 0; place-items: center; }
+.pet-visual { display: grid; place-items: center; overflow: visible; }
+.pet-visual.placeholder { border-radius: 50%; color: #fff; font-size: 42px; background: #9b7bd1; box-shadow: 0 8px 24px #25184366; }
+.pet-visual.has-image { background: transparent; }
+.pet-visual img { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.settings-window { min-height: 100%; padding: 20px; display: grid; align-content: start; gap: 14px; background: #f3f5f7; overflow-y: auto; }
+.settings-window h1, .settings-window h2 { margin: 0; }
+.settings-window h1 { font-size: 18px; }
+.settings-window h2 { font-size: 15px; }
+.settings-window input { width: 100%; }
+.resource-actions { display: grid; gap: 8px; }
+.resource-actions button { padding: 9px 10px; border: 0; border-radius: 8px; color: #fff; background: #5d6c83; cursor: pointer; }
+.resource-actions button:hover { background: #4c5a6e; }
+.clicker-controls { display: grid; gap: 8px; color: #526170; font-size: 13px; }
+.clicker-controls > div { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.clicker-controls button, .sound-settings button { padding: 9px 10px; border: 0; border-radius: 8px; color: #fff; background: #5d6c83; cursor: pointer; }
+.clicker-controls button:disabled { cursor: not-allowed; opacity: .45; }
+.clicker-controls .secondary-button { background: #7b8798; }
+.clicker-list { display: grid; gap: 10px; }
+.clicker-card { display: grid; gap: 8px; padding: 12px; border: 1px solid #d9dee5; border-radius: 10px; background: #fff; }
+.sound-settings { display: grid; gap: 8px; padding-top: 2px; }
+.sound-settings button { padding: 9px 10px; border: 0; border-radius: 8px; color: #fff; background: #5d6c83; cursor: pointer; }
+.sound-settings button:hover { background: #4c5a6e; }
+.sound-settings .sound-toggle { background: #7b8798; }
+.sound-settings .sound-toggle.is-enabled { background: #5d6c83; }
+.sound-settings .secondary-button { background: #7b8798; }
+.sound-summary { color: #526170; font-size: 12px; }
+.settings-window p { margin: 0; color: #a64450; font-size: 12px; }
