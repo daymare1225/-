@@ -16,6 +16,11 @@ struct InputEvent {
 
 pub fn start(app: AppHandle) {
     std::thread::spawn(move || {
+        // macOS에서 rdev의 키보드 레이아웃 변환은 이 리스너 스레드가
+        // 메인 스레드가 아님을 명시해야 안전하게 동작한다.
+        #[cfg(target_os = "macos")]
+        rdev::set_is_main_thread(false);
+
         let _ = app.emit("input-listener-status", "starting");
         let listener_app = app.clone();
         let pressed_keys = Arc::new(Mutex::new(HashSet::new()));
