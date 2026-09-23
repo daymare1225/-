@@ -2,6 +2,7 @@ mod input;
 
 use std::{fs, path::{Path, PathBuf}, time::{SystemTime, UNIX_EPOCH}};
 
+use image::{ImageFormat, ImageReader};
 use tauri::{
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
@@ -24,7 +25,7 @@ fn import_resource(
     }
 
     let source = Path::new(&source_path);
-    let extension = source
+    let _extension = source
         .extension()
         .and_then(|value| value.to_str())
         .map(str::to_ascii_lowercase)
@@ -34,6 +35,19 @@ fn import_resource(
     if metadata.len() > 10 * 1024 * 1024 {
         return Err("이미지는 10MB 이하만 사용할 수 있습니다.".into());
     }
+    let (width, height) = image::image_dimensions(source)
+        .map_err(|_| "선택한 이미지의 크기를 읽을 수 없습니다.".to_string())?;
+    if width > 4096 || height > 4096 || u64::from(width) * u64::from(height) > 16_000_000 {
+        return Err("이미지는 가로·세로 4,096px 및 총 1,600만 화소 이하만 사용할 수 있습니다.".into());
+    }
+    let image = ImageReader::open(source)
+        .map_err(|_| "선택한 이미지 파일을 읽을 수 없습니다.".to_string())?
+        .with_guessed_format()
+        .map_err(|_| "이미지 형식을 확인할 수 없습니다.".to_string())?
+        .decode()
+        .map_err(|_| "이미지를 해석할 수 없습니다.".to_string())?;
+    // 화면 최대 표시 크기(512px)의 2배만 보관해 Retina 화면에서도 선명도를 유지한다.
+    let image = image.thumbnail(1024, 1024);
 
     let resource_dir = app
         .path()
@@ -46,8 +60,10 @@ fn import_resource(
         .duration_since(UNIX_EPOCH)
         .map_err(|_| "이미지 저장 이름을 만들 수 없습니다.".to_string())?
         .as_nanos();
-    let destination = resource_dir.join(format!("{clicker_id}-{slot}-{nonce}.{extension}"));
-    fs::copy(source, &destination).map_err(|_| "이미지를 앱 폴더로 복사하지 못했습니다.".to_string())?;
+    let destination = resource_dir.join(format!("{clicker_id}-{slot}-{nonce}.png"));
+    image
+        .save_with_format(&destination, ImageFormat::Png)
+        .map_err(|_| "이미지를 앱 폴더에 최적화해 저장하지 못했습니다.".to_string())?;
 
     if let Some(previous_path) = previous_path {
         let canonical_resource_dir = fs::canonicalize(&resource_dir)

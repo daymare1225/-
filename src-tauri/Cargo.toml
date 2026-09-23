@@ -13,9 +13,10 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-# rdev 0.5.x crashes on macOS when its keyboard-layout API is used from the
-# background listener thread. Keep this revision fixed for reproducible builds.
-rdev = { git = "https://github.com/Narsil/rdev", rev = "b7e201bf80be7b9632207366f277d29fe732b9c1" }
+# macOS 전역 입력의 안정성과 경량 처리를 위해, 필요한 수정만 반영한
+# rdev 0.6.0 소스를 프로젝트에 함께 고정한다.
+rdev = { path = "vendor/rdev" }
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp"] }
 serde = { version = "1", features = ["derive"] }
 tauri = { version = "2", features = ["protocol-asset", "tray-icon"] }
 tauri-plugin-dialog = "2"
