@@ -155,6 +155,7 @@ impl Handle {
                         .write(&[event_x, event_y, sync])
                         .map_err(|_| SimulateError)?;
                 }
+                EventType::ListenerReset => return Err(SimulateError),
             }
         }
         Ok(())

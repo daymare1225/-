@@ -80,6 +80,18 @@ fn emit_input_event(
                 None
             }
         }
+        EventType::ListenerReset => {
+            pressed_keys
+                .lock()
+                .expect("키 입력 상태 잠금에 실패했습니다.")
+                .clear();
+            pressed_buttons
+                .lock()
+                .expect("마우스 입력 상태 잠금에 실패했습니다.")
+                .clear();
+            let _ = app.emit("input-reset", ());
+            None
+        }
         _ => None,
     };
 

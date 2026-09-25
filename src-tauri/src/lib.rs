@@ -209,12 +209,14 @@ fn show_settings_window(app: &AppHandle) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![import_resource, import_sounds, clear_sounds, resize_main_widget, reset_input_state, open_settings_window])
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {
                 window.set_always_on_top(true)?;
+                #[cfg(target_os = "macos")]
+                window.set_visible_on_all_workspaces(true)?;
             }
             if let Some(window) = app.get_webview_window("settings") {
                 let settings_window = window.clone();
@@ -245,6 +247,18 @@ pub fn run() {
             input::start(app.handle().clone());
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("Tauri 애플리케이션 실행에 실패했습니다.");
+        .build(tauri::generate_context!())
+        .expect("Tauri 애플리케이션을 초기화하지 못했습니다.");
+
+    app.run(|app, event| {
+            #[cfg(not(target_os = "macos"))]
+            let _ = (app, event);
+
+            #[cfg(target_os = "macos")]
+            if matches!(event, tauri::RunEvent::Resumed) {
+                // A resumed event can follow sleep or a macOS workspace/app
+                // transition. Do not keep a stale pressed visual state.
+                reset_input_state(app.clone());
+            }
+        });
 }

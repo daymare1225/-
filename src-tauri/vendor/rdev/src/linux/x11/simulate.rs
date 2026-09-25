@@ -65,6 +65,7 @@ unsafe fn send_native(event_type: &EventType, display: *mut xlib::Display) -> Op
                 }
                 result
             }
+            EventType::ListenerReset => return None,
         };
         if res == 0 { None } else { Some(()) }
     }

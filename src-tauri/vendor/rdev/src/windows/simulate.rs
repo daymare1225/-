@@ -128,5 +128,6 @@ pub fn simulate(event_type: &EventType) -> Result<(), SimulateError> {
                 (*y as i32 + 1) * 65535 / height,
             )
         }
+        EventType::ListenerReset => Err(SimulateError),
     }
 }

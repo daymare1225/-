@@ -142,6 +142,7 @@ unsafe fn convert_native_with_source(
                     0,
                 )
             }
+            EventType::ListenerReset => None,
         }
     }
 }

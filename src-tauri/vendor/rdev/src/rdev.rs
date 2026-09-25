@@ -269,6 +269,9 @@ pub enum EventType {
         delta_x: i64,
         delta_y: i64,
     },
+    /// The operating system interrupted the global event stream. Consumers
+    /// should discard any locally cached pressed-key or pressed-button state.
+    ListenerReset,
 }
 
 /// When events arrive from the OS they get some additional information added from

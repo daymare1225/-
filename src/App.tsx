@@ -38,6 +38,18 @@ function WidgetWindow() {
   }, []);
 
   useEffect(() => {
+    const resetAfterVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      keyboardHeld.current = false;
+      mouseActive.current = false;
+      setInputActive(false);
+      void invoke("reset_input_state");
+    };
+    document.addEventListener("visibilitychange", resetAfterVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", resetAfterVisibilityChange);
+  }, []);
+
+  useEffect(() => {
     const hasImage = settings.clickers.some((clicker) => Object.values(clicker.resources).some(Boolean));
     if (!hasImage && !openedInitialSettings.current) {
       openedInitialSettings.current = true;
