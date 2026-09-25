@@ -2,7 +2,7 @@
 
 키보드와 마우스 입력에 반응해 사용자가 지정한 이미지를 보여주는 가벼운 데스크톱 위젯입니다. Bongo Cat처럼 입력 순간에 이미지를 바꾸며, 입력 내용·횟수·개인정보는 기록하거나 외부로 전송하지 않습니다.
 
-현재 버전은 **0.1.1**입니다.
+현재 버전은 **0.1.2**입니다.
 
 ## 주요 기능
 
@@ -63,7 +63,7 @@ npm run tauri -- build --bundles nsis
 생성 위치:
 
 ```text
-src-tauri/target/release/bundle/nsis/클리커 장난감_0.1.1_x64-setup.exe
+src-tauri/target/release/bundle/nsis/클리커 장난감_0.1.2_x64-setup.exe
 ```
 
 ### macOS

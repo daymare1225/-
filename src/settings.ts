@@ -1,8 +1,10 @@
 export type ResourceSlot = "idle" | "active" | "active_alt";
+export type Layout = "default" | "vertical" | "horizontal";
 export type Resources = Record<ResourceSlot, string | null>;
 export type Clicker = { id: string; resources: Resources };
 export type Settings = {
   scale: number;
+  layout: Layout;
   clickers: Clicker[];
   soundEnabled: boolean;
   sounds: string[];
@@ -14,6 +16,7 @@ export const createClicker = (id: string): Clicker => ({ id, resources: emptyRes
 
 export const defaultSettings: Settings = {
   scale: 1,
+  layout: "default",
   clickers: [createClicker("clicker-1")],
   soundEnabled: true,
   sounds: [],
@@ -39,6 +42,7 @@ export function parseSettings(raw: string | null): Settings {
     if (!saved) return defaultSettings;
     return {
       scale: typeof saved.scale === "number" && saved.scale >= 0.5 && saved.scale <= 4 ? saved.scale : 1,
+      layout: saved.layout === "vertical" || saved.layout === "horizontal" ? saved.layout : "default",
       clickers: parseClickers(saved),
       soundEnabled: saved.soundEnabled !== false,
       sounds: Array.isArray(saved.sounds) ? saved.sounds.filter((sound): sound is string => typeof sound === "string") : [],

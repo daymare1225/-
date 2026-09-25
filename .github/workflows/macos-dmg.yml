@@ -46,6 +46,6 @@ jobs:
       - name: DMG 업로드
         uses: actions/upload-artifact@v4
         with:
-          name: 클리커-장난감-0.1.1-macos-${{ matrix.target }}
+          name: 클리커-장난감-0.1.2-macos-${{ matrix.target }}
           path: src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
           if-no-files-found: error

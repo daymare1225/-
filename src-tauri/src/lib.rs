@@ -77,6 +77,43 @@ fn import_resource(
     Ok(destination.to_string_lossy().into_owned())
 }
 
+#[tauri::command]
+fn remove_resource(
+    app: AppHandle,
+    resource_path: String,
+    clicker_id: String,
+    slot: String,
+) -> Result<(), String> {
+    if !matches!(slot.as_str(), "idle" | "active" | "active_alt") {
+        return Err("알 수 없는 이미지 슬롯입니다.".into());
+    }
+    if clicker_id.is_empty() || clicker_id.len() > 64 || !clicker_id.bytes().all(|byte| byte.is_ascii_alphanumeric() || byte == b'-') {
+        return Err("유효하지 않은 클리커 번호입니다.".into());
+    }
+    let resource_dir = app
+        .path()
+        .app_local_data_dir()
+        .map_err(|_| "앱 데이터 폴더를 찾을 수 없습니다.".to_string())?
+        .join("resources");
+    let canonical_resource_dir = match fs::canonicalize(&resource_dir) {
+        Ok(path) => path,
+        Err(_) => return Ok(()),
+    };
+    let path = match fs::canonicalize(&resource_path) {
+        Ok(path) => path,
+        Err(_) => return Ok(()),
+    };
+    let expected_prefix = format!("{clicker_id}-{slot}-");
+    let valid_name = path
+        .file_name()
+        .and_then(|name| name.to_str())
+        .is_some_and(|name| name.starts_with(&expected_prefix));
+    if path.parent() != Some(canonical_resource_dir.as_path()) || !valid_name {
+        return Err("앱이 관리하는 해당 이미지 파일만 삭제할 수 있습니다.".into());
+    }
+    fs::remove_file(path).map_err(|_| "이미지 파일을 삭제하지 못했습니다.".to_string())
+}
+
 const MAX_SOUND_FILE_BYTES: u64 = 20 * 1024 * 1024;
 const MAX_SOUND_TOTAL_BYTES: u64 = 100 * 1024 * 1024;
 
@@ -164,10 +201,14 @@ fn clear_sounds(app: AppHandle, sound_paths: Vec<String>) -> Result<(), String> 
 }
 
 #[tauri::command]
-fn resize_main_widget(app: AppHandle, image_side: u32, clicker_count: u32) -> Result<(), String> {
+fn resize_main_widget(app: AppHandle, image_side: u32, clicker_count: u32, layout: String) -> Result<(), String> {
     let image_side = image_side.clamp(128, 512);
     let clicker_count = clicker_count.clamp(1, 4);
-    let columns = if clicker_count > 2 { 2 } else { clicker_count };
+    let columns = match layout.as_str() {
+        "vertical" => 1,
+        "horizontal" => clicker_count,
+        _ => if clicker_count > 2 { 2 } else { clicker_count },
+    };
     let rows = clicker_count.div_ceil(columns);
     let width = (image_side * columns + 96).max(220);
     let height = (image_side * rows + 128).max(220);
@@ -211,7 +252,7 @@ fn show_settings_window(app: &AppHandle) {
 pub fn run() {
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![import_resource, import_sounds, clear_sounds, resize_main_widget, reset_input_state, open_settings_window])
+        .invoke_handler(tauri::generate_handler![import_resource, remove_resource, import_sounds, clear_sounds, resize_main_widget, reset_input_state, open_settings_window])
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {
                 window.set_always_on_top(true)?;

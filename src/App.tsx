@@ -2,7 +2,7 @@ import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useEffect, useRef, useState } from "react";
-import { createClicker, parseSettings, type Clicker, type ResourceSlot, type Settings } from "./settings";
+import { createClicker, parseSettings, type Clicker, type Layout, type ResourceSlot, type Settings } from "./settings";
 
 const STORAGE_KEY = "input-pet-clicker.settings.v2";
 
@@ -22,8 +22,8 @@ function WidgetWindow() {
 
   useEffect(() => {
     const imageSide = Math.ceil(128 * settings.scale);
-    void invoke("resize_main_widget", { imageSide, clickerCount: settings.clickers.length });
-  }, [settings.scale, settings.clickers.length]);
+    void invoke("resize_main_widget", { imageSide, clickerCount: settings.clickers.length, layout: settings.layout });
+  }, [settings.scale, settings.clickers.length, settings.layout]);
 
   useEffect(() => {
     let previousTick = Date.now();
@@ -121,7 +121,11 @@ function WidgetWindow() {
     };
   }, [settings.clickers, settings.soundEnabled, settings.sounds]);
 
-  const columns = settings.clickers.length > 2 ? 2 : settings.clickers.length;
+  const columns = settings.layout === "vertical"
+    ? 1
+    : settings.layout === "horizontal"
+      ? settings.clickers.length
+      : settings.clickers.length > 2 ? 2 : settings.clickers.length;
   return (
     <main className="widget-shell" data-tauri-drag-region="" onContextMenu={(event) => event.preventDefault()}>
       <div className="pet-grid" data-tauri-drag-region="" style={{ gridTemplateColumns: `repeat(${columns}, ${128 * settings.scale}px)` }}>
@@ -187,6 +191,23 @@ function SettingsWindow() {
     }
   }
 
+  async function removeResource(clicker: Clicker, slot: ResourceSlot) {
+    const resourcePath = clicker.resources[slot];
+    if (!resourcePath) return;
+    setResourceError(null);
+    try {
+      await invoke("remove_resource", { resourcePath, clickerId: clicker.id, slot });
+      setSettings((current) => ({
+        ...current,
+        clickers: current.clickers.map((currentClicker) => currentClicker.id === clicker.id
+          ? { ...currentClicker, resources: { ...currentClicker.resources, [slot]: null } }
+          : currentClicker),
+      }));
+    } catch (error) {
+      setResourceError(typeof error === "string" ? error : "이미지를 삭제하지 못했습니다.");
+    }
+  }
+
   async function chooseSounds() {
     setResourceError(null);
     try {
@@ -239,14 +260,30 @@ function SettingsWindow() {
       </section>
       <h2>공통 이미지 크기</h2>
       <input aria-label="이미지 크기" type="range" min="0.5" max="4" step="0.1" value={settings.scale} onChange={(event) => setSettings((current) => ({ ...current, scale: Number(event.target.value) }))} />
+      <section className="layout-controls" aria-label="클리커 배치 정렬">
+        <h2>클리커 배치</h2>
+        <div>
+          {(["default", "vertical", "horizontal"] as const).map((layout: Layout) => (
+            <button
+              type="button"
+              key={layout}
+              className={settings.layout === layout ? "is-selected" : ""}
+              aria-pressed={settings.layout === layout}
+              onClick={() => setSettings((current) => ({ ...current, layout }))}
+            >
+              {layout === "default" ? "기본" : layout === "vertical" ? "세로 정렬" : "가로 정렬"}
+            </button>
+          ))}
+        </div>
+      </section>
       <section className="clicker-list" aria-label="클리커별 이미지 설정">
         {settings.clickers.map((clicker, index) => (
           <section className="clicker-card" key={clicker.id}>
             <h2>클리커 {index + 1}</h2>
             <div className="resource-actions">
-              <button onClick={() => void chooseResource(clicker, "idle")}>기본 이미지 선택</button>
-              <button onClick={() => void chooseResource(clicker, "active")}>입력 이미지 선택</button>
-              <button onClick={() => void chooseResource(clicker, "active_alt")}>보조 이미지 선택</button>
+              <button onClick={() => void (clicker.resources.idle ? removeResource(clicker, "idle") : chooseResource(clicker, "idle"))}>{clicker.resources.idle ? "기본 이미지 삭제" : "기본 이미지 선택"}</button>
+              <button onClick={() => void (clicker.resources.active ? removeResource(clicker, "active") : chooseResource(clicker, "active"))}>{clicker.resources.active ? "입력 이미지 삭제" : "입력 이미지 선택"}</button>
+              <button onClick={() => void (clicker.resources.active_alt ? removeResource(clicker, "active_alt") : chooseResource(clicker, "active_alt"))}>{clicker.resources.active_alt ? "보조 이미지 삭제" : "보조 이미지 선택"}</button>
             </div>
           </section>
         ))}

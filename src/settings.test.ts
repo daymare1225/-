@@ -32,4 +32,10 @@ describe("parseSettings", () => {
       sounds: ["click.mp3"],
     });
   });
+
+  it("uses the default layout for old or invalid settings and restores supported layouts", () => {
+    expect(parseSettings(null)).toMatchObject({ layout: "default" });
+    expect(parseSettings('{"layout":"vertical"}')).toMatchObject({ layout: "vertical" });
+    expect(parseSettings('{"layout":"diagonal"}')).toMatchObject({ layout: "default" });
+  });
 });

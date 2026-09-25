@@ -9,7 +9,7 @@ button, input { font: inherit; }
 .pet-visual.placeholder { border-radius: 50%; color: #fff; font-size: 42px; background: #9b7bd1; box-shadow: 0 8px 24px #25184366; }
 .pet-visual.has-image { background: transparent; }
 .pet-visual img { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-.settings-window { min-height: 100%; padding: 20px; display: grid; align-content: start; gap: 14px; background: #f3f5f7; overflow-y: auto; }
+.settings-window { height: 100%; min-height: 0; padding: 20px; display: grid; align-content: start; gap: 14px; background: #f3f5f7; overflow-y: auto; overscroll-behavior: contain; }
 .settings-window h1, .settings-window h2 { margin: 0; }
 .settings-window h1 { font-size: 18px; }
 .settings-window h2 { font-size: 15px; }
@@ -22,6 +22,10 @@ button, input { font: inherit; }
 .clicker-controls button, .sound-settings button { padding: 9px 10px; border: 0; border-radius: 8px; color: #fff; background: #5d6c83; cursor: pointer; }
 .clicker-controls button:disabled { cursor: not-allowed; opacity: .45; }
 .clicker-controls .secondary-button { background: #7b8798; }
+.layout-controls { display: grid; gap: 8px; }
+.layout-controls > div { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.layout-controls button { padding: 9px 6px; border: 0; border-radius: 8px; color: #fff; background: #7b8798; cursor: pointer; }
+.layout-controls button.is-selected { background: #5d6c83; }
 .clicker-list { display: grid; gap: 10px; }
 .clicker-card { display: grid; gap: 8px; padding: 12px; border: 1px solid #d9dee5; border-radius: 10px; background: #fff; }
 .sound-settings { display: grid; gap: 8px; padding-top: 2px; }
