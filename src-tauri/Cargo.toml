@@ -18,5 +18,5 @@ tauri-build = { version = "2", features = [] }
 rdev = { path = "vendor/rdev" }
 image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp"] }
 serde = { version = "1", features = ["derive"] }
-tauri = { version = "2", features = ["protocol-asset", "tray-icon"] }
+tauri = { version = "2", features = ["protocol-asset", "tray-icon", "macos-private-api"] }
 tauri-plugin-dialog = "2"
